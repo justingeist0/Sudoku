@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#2C2C2C</color>
+    <color name="colorPrimaryDark">#1E1E1E</color>
+    <color name="colorAccent">#888888</color>
+
+    <color name="selectedCellBackground">#FFF6C5</color>
+    <color name="conflictingCellBackground">#FFFFFF</color>
+    <color name="cellBackground">#EAEAEA</color>
+    <color name="invalidCellText">#8A0000</color>
+</resources>

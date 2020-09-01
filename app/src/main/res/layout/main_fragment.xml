@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+            name="sudokuGame"
+            type="com.fantasma.sudoku.game.SudokuGame" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/main"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/cellBackground"
+        tools:context=".ui.main.MainFragment"
+        >
+
+        <com.fantasma.sudoku.view.custom.SudokuBoardView
+            android:id="@+id/game_layout"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_margin="6dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/game_controls_layout"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+
+        <LinearLayout
+            android:id="@+id/game_controls_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/game_layout"
+            android:layout_marginHorizontal="6dp"
+            android:layout_marginBottom="6dp"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <Button
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:onClick="@{() -> sudokuGame.handleInput(1)}"
+                    android:text="@string/_1"
+                    style="@style/numberButton"/>
+
+                <Button
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:onClick="@{() -> sudokuGame.handleInput(2)}"
+                    android:text="@string/_2"
+                    style="@style/numberButton"/>
+
+                <Button
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:onClick="@{() -> sudokuGame.handleInput(3)}"
+                    android:text="@string/_3"
+                    style="@style/numberButton"/>
+
+                <Button
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:onClick="@{() -> sudokuGame.handleInput(4)}"
+                    android:text="@string/_4"
+                    style="@style/numberButton"/>
+
+                <Button
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:onClick="@{() -> sudokuGame.handleInput(5)}"
+                    android:text="@string/_5"
+                    style="@style/numberButton"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <Button
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:onClick="@{() -> sudokuGame.handleInput(6)}"
+                    android:text="@string/_6"
+                    style="@style/numberButton"/>
+
+                <Button
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:onClick="@{() -> sudokuGame.handleInput(7)}"
+                    android:text="@string/_7"
+                    style="@style/numberButton"/>
+
+                <Button
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:onClick="@{() -> sudokuGame.handleInput(8)}"
+                    android:text="@string/_8"
+                    style="@style/numberButton"/>
+
+                <Button
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:onClick="@{() -> sudokuGame.handleInput(9)}"
+                    android:text="@string/_9"
+                    style="@style/numberButton"/>
+
+                <Button
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/_9"
+                    style="@style/numberButton"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>
