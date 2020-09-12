@@ -1,36 +1,53 @@
 package com.fantasma.sudoku.game
 
 import androidx.lifecycle.MutableLiveData
+import com.fantasma.sudoku.database.SudokuBoard
+import com.fantasma.sudoku.util.Constant.EASY
 import com.fantasma.sudoku.util.Constant.SQRT_SIZE
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 
 class SudokuGame {
-
     val selectedCellLiveData = MutableLiveData<Pair<Int, Int>>()
     val cellsLiveData = MutableLiveData<List<Cell>>()
     val isTakingNotesLiveData = MutableLiveData<Boolean>()
     val highlightedKeysLiveData = MutableLiveData<Set<Int>>()
-    val gameWon = MutableLiveData<Boolean>(false)
+    val gameWonLiveData = MutableLiveData<Boolean>()
+    val gameIdLiveData = MutableLiveData<Long>()
+    val undoBtnEnabledLiveData = MutableLiveData<Boolean>()
+    val redoBtnEnabledLiveData = MutableLiveData<Boolean>()
+    val deleteBtnEnabledLiveData = MutableLiveData<Boolean>()
+    val helpAvailableLiveData = MutableLiveData<Boolean>()
+    val headerLabelLiveData = MutableLiveData<Int>()
+
+    private val actions: MutableList<Action> = mutableListOf()
+    private var actionIdx = -1
 
     private var filledIn = 0
     private var selectedRow = -1
     private var selectedCol = -1
-    private var isTakingNotes = false
 
-    private val board: Board
+    private val board: Board = Board()
 
     init {
-        val cells = List(9 * 9) {i ->
-            println(i%9)
-            Cell(i / 9, i % 9, 0)}
-        board = Board(9, cells)
+        initGame()
+    }
+
+    private fun initGame() {
+        selectedRow = -1
+        selectedCol = -1
 
         selectedCellLiveData.postValue(Pair(selectedRow, selectedCol))
         cellsLiveData.postValue(board.cells)
-        isTakingNotesLiveData.postValue(isTakingNotes)
+        isTakingNotesLiveData.postValue(false)
+        highlightedKeysLiveData.postValue(setOf())
+        gameWonLiveData.postValue(false)
+        undoBtnEnabledLiveData.postValue(false)
+        redoBtnEnabledLiveData.postValue(false)
+        deleteBtnEnabledLiveData.postValue(false)
+        helpAvailableLiveData.postValue(false)
+        actions.clear()
+        actionIdx = -1
+        filledIn = 0
     }
 
     fun handleInput(number: Int) {
@@ -38,109 +55,187 @@ class SudokuGame {
         val cell = board.getCell(selectedRow, selectedCol)
         if (cell.isStartingCell) return
 
-        if (isTakingNotes) {
-            if (cell.notes.contains(number)) {
+        if (isTakingNotesLiveData.value!!) {
+            if (cell.notes.contains(number))
                 cell.notes.remove(number)
-            } else {
+            else
                 cell.notes.add(number)
-            }
             highlightedKeysLiveData.postValue(cell.notes)
         } else {
             val prevValue = cell.value
-            if(prevValue != number) {
-                if(cell.value == 0) {
+            if (prevValue != number) {
+                if (cell.value == 0) {
                     filledIn++
                 }
+
                 cell.value = number
-                cell.conflictingCells = 0
-                //Calculate conflicts with cells
-                board.cells.forEach { conflictingCell ->
-                    val r = conflictingCell.row
-                    val c = conflictingCell.col
+                board.checkConflictingCells(cell, prevValue)
 
-                    if (r == selectedRow || c == selectedCol || r / SQRT_SIZE == selectedRow / SQRT_SIZE && c / SQRT_SIZE == selectedCol / SQRT_SIZE) {
-                        if(conflictingCell.value == number) { //Will always execute for selected cell
-                            conflictingCell.conflictingCells++
-                            cell.conflictingCells++
-                        } else if (conflictingCell.value == prevValue) {
-                            conflictingCell.conflictingCells--
-                        }
-                    }
+                val cellIdx = board.getIdx(selectedRow, selectedCol)
+                if (actionIdx < 0 || actions[actionIdx].idx != cellIdx) {
+                    actionIdx++
+                    actions.add(actionIdx, Action(prevValue, cellIdx))
+                    updateButtonsEnabled()
                 }
-                cell.conflictingCells -= 2 //Selected cell does not conflict with itself
 
-                if(filledIn == 81) {
+                if (filledIn == 81) {
                     checkIfBoardComplete()
                 }
             } else {
                 return
             }
+            deleteBtnEnabledLiveData.postValue(true)
         }
         cellsLiveData.postValue(board.cells)
     }
 
+    fun postBoard(sudokuBoard: SudokuBoard, restart: Boolean = false) {
+        board.setBoard(sudokuBoard, restart)
+        initGame()
+        headerLabelLiveData.postValue(sudokuBoard.boardDifficulty)
+        gameIdLiveData.postValue(sudokuBoard.boardId)
+        board.cells.forEach { if (it.isStartingCell) filledIn++ }
+    }
+
     private fun checkIfBoardComplete() {
-        board.cells.forEach {cell ->
-            if(cell.conflictingCells != 0) return
+        board.cells.forEach { cell ->
+            if (cell.conflictingCells != 0) return
         }
-        gameWon.postValue(true)
+        gameWonLiveData.postValue(true)
+        gameIdLiveData.postValue(-1L)
     }
 
     fun updateSelectedCell(row: Int, col: Int) {
-
-        if(row == -1 || col == -1) {
+        if (row == -1 || col == -1) {
             selectedRow = row
             selectedCol = col
             selectedCellLiveData.postValue(Pair(row, col))
+            deleteBtnEnabledLiveData.postValue(false)
+            helpAvailableLiveData.postValue(false)
             return
         }
 
         val cell = board.getCell(row, col)
 
-        if (!cell.isStartingCell) {
-            selectedRow = row
-            selectedCol = col
-            selectedCellLiveData.postValue(Pair(row, col))
+        selectedRow = row
+        selectedCol = col
+        selectedCellLiveData.postValue(Pair(row, col))
+        deleteBtnEnabledLiveData.postValue(!cell.isStartingCell && cell.value > 0)
+        helpAvailableLiveData.postValue(!cell.isStartingCell)
 
-            if (isTakingNotes) {
-                highlightedKeysLiveData.postValue(cell.notes)
-            }
+        if (!cell.isStartingCell && isTakingNotesLiveData.value!!) {
+            highlightedKeysLiveData.postValue(cell.notes)
+        } else {
+            highlightedKeysLiveData.postValue(setOf())
         }
+    }
+
+    fun undo() {
+        val undoAction = actions[actionIdx]
+        val cell = board.cells[undoAction.idx]
+        val prevValue = cell.value
+
+        cell.value = undoAction.valuePosted
+        undoAction.valuePosted = prevValue
+
+        board.checkConflictingCells(cell, prevValue)
+
+        actionIdx--
+
+        cellsLiveData.postValue(board.cells)
+        updateButtonsEnabled()
+    }
+
+    fun redo() {
+        actionIdx++
+
+        val redoAction = actions[actionIdx]
+        val cell = board.cells[redoAction.idx]
+        val prevValue = cell.value
+
+        cell.value = redoAction.valuePosted
+        redoAction.valuePosted = prevValue
+
+        board.checkConflictingCells(cell, prevValue)
+
+        cellsLiveData.postValue(board.cells)
+        updateButtonsEnabled()
     }
 
     fun changeNoteTakingState() {
-        isTakingNotes = !isTakingNotes
-        isTakingNotesLiveData.postValue(isTakingNotes)
+        val isNoteTaking = !isTakingNotesLiveData.value!!
+        isTakingNotesLiveData.postValue(isNoteTaking)
 
-        val curNotes = if (isTakingNotes) {
-            board.getCell(selectedRow, selectedCol).notes
+        if (isNoteTaking && selectedCol != -1 && selectedRow != -1) {
+            val currentNotes = board.getCell(selectedRow, selectedCol).notes
+            highlightedKeysLiveData.postValue(currentNotes)
         } else {
-            setOf<Int>()
+            highlightedKeysLiveData.postValue(setOf())
         }
-        highlightedKeysLiveData.postValue(curNotes)
     }
 
     fun delete() {
-        val cell = board.getCell(selectedRow, selectedCol)
-        if (isTakingNotes) {
-            cell.notes.clear()
-            highlightedKeysLiveData.postValue(setOf())
-        } else {
-            cell.value = 0
+        val cellIdx = board.getIdx(selectedRow, selectedCol)
+        val cell = board.cells[cellIdx]
+
+        actionIdx++
+        actions.add(actionIdx, Action(cell.value, cellIdx))
+
+        board.cells.forEach { conflictingCell ->
+            val r = conflictingCell.row
+            val c = conflictingCell.col
+
+            if (r == selectedRow || c == selectedCol || r / SQRT_SIZE == selectedRow / SQRT_SIZE && c / SQRT_SIZE == selectedCol / SQRT_SIZE) {
+                if (conflictingCell.value == cell.value) { //Check if this delete makes less conflicting cells
+                    conflictingCell.conflictingCells--
+                }
+            }
         }
+        cell.conflictingCells = 0
+        cell.value = 0
+
         cellsLiveData.postValue(board.cells)
+        updateButtonsEnabled()
     }
 
-    fun createBoard(difficulty: Int) {
-        val generator = SudokuBoardGenerator()
+    fun setAnswerForSelected() {
 
-        val scope = CoroutineScope(Job())
-        scope.launch(Dispatchers.Default) {
-            generator.generateBoard(difficulty)
+    }
+
+    fun solveInStyle() {
+        val boardValues = Array(81) { i -> board.cells[i].value }
+
+        val scope = CoroutineScope(Dispatchers.Default)
+        scope.launch {
+            SudokuBoardGenerator.solve(boardValues) { idx ->
+                board.cells[idx].apply {
+                    value = boardValues[idx]
+                    conflictingCells = 0
+                }
+                cellsLiveData.postValue(board.cells)
+                Thread.sleep(20)
+            }
         }
+
     }
 
-    fun getValue(row: Int, column: Int) : Int = if(row == -1 || column == -1) 0 else board.getCell(row, column).value
+    fun getSudokuBoard(): SudokuBoard? {
+        return board.getSudokuBoard()
+    }
 
+    private fun updateButtonsEnabled() {
+        undoBtnEnabledLiveData.postValue(actionIdx >= 0)
+        redoBtnEnabledLiveData.postValue(actionIdx < actions.size - 1)
 
+        val cell = getSelectedCell()
+        val canDelete = cell != null && !cell.isStartingCell && cell.value > 0
+        deleteBtnEnabledLiveData.postValue(canDelete)
+    }
+
+    private fun getSelectedCell(): Cell? {
+        return if (selectedRow == -1 || selectedCol == -1) null
+        else board.getCell(selectedRow, selectedCol)
+    }
+
+    inner class Action(var valuePosted: Int, val idx: Int)
 }

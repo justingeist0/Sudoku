@@ -11,6 +11,22 @@
         <item name="android:background">@drawable/btn_number</item>
         <item name="android:textSize">20sp</item>
         <item name="android:layout_margin">1dp</item>
+        <item name="android:fontFamily">@font/roboto_medium</item>
+        <item name="android:padding">8dp</item>
     </style>
+
+    <style name="mainMenuButton">
+        <item name="android:background">@drawable/btn_main_menu</item>
+        <item name="android:textColor">@color/cellBackground</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:layout_marginStart">16dp</item>
+        <item name="android:layout_marginEnd">16dp</item>
+        <item name="android:layout_marginTop">4dp</item>
+        <item name="android:layout_marginBottom">4dp</item>
+    </style>
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.MaterialComponents.Dark.ActionBar" />
+
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.MaterialComponents.Light" />
 
 </resources>

@@ -8,8 +8,9 @@ import android.view.MotionEvent
 import android.view.View
 import androidx.core.content.ContextCompat
 import com.fantasma.sudoku.R
+import com.fantasma.sudoku.database.SudokuBoard
 import com.fantasma.sudoku.game.Cell
-import com.fantasma.sudoku.util.Constant.SIZE
+import com.fantasma.sudoku.util.Constant.GRID_SIZE
 import com.fantasma.sudoku.util.Constant.SQRT_SIZE
 import kotlin.math.min
 
@@ -25,8 +26,8 @@ class SudokuBoardView(context: Context, attributeSet: AttributeSet) : View(conte
     private var startY = 0F
     private lateinit var boardRectangle: List<Float>
 
-    private var selectedRow = 0
-    private var selectedCol = 0
+    private var selectedRow = -1
+    private var selectedCol = -1
 
     private var listener: SudokuBoardView.OnTouchListener? = null
 
@@ -47,6 +48,11 @@ class SudokuBoardView(context: Context, attributeSet: AttributeSet) : View(conte
     private val conflictingCellPaint = Paint().apply {
         style = Paint.Style.FILL_AND_STROKE
         color = ContextCompat.getColor(getContext(), R.color.conflictingCellBackground)
+    }
+
+    private val conflictingValidCellPaint = Paint().apply {
+        style = Paint.Style.FILL_AND_STROKE
+        color = ContextCompat.getColor(getContext(), R.color.conflictingValidCellBackground)
     }
 
     private val textPaint = Paint().apply {
@@ -75,6 +81,11 @@ class SudokuBoardView(context: Context, attributeSet: AttributeSet) : View(conte
         color = ContextCompat.getColor(getContext(), R.color.selectedCellBackground)
     }
 
+    private val startingValidCellPaint = Paint().apply {
+        style = Paint.Style.FILL_AND_STROKE
+        color = ContextCompat.getColor(getContext(), R.color.selectedValidCellBackground)
+    }
+
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
 
@@ -82,6 +93,9 @@ class SudokuBoardView(context: Context, attributeSet: AttributeSet) : View(conte
         height = MeasureSpec.getSize(heightMeasureSpec).toFloat()
 
         updateMeasurements(width, height)
+
+        val sizePixels = min(widthMeasureSpec, heightMeasureSpec)
+        setMeasuredDimension(sizePixels, sizePixels)
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -91,21 +105,36 @@ class SudokuBoardView(context: Context, attributeSet: AttributeSet) : View(conte
     }
 
     private fun updateMeasurements(width: Float, height: Float) {
-        cellSizePixels = min(width, height) / SIZE.toFloat()
+        cellSizePixels = min(width, height) / GRID_SIZE.toFloat()
 
-        val boardSize = cellSizePixels*SIZE
-        if(width < height) {
-            startY = (height - boardSize) / 2
-        } else if(height < width) {
-            startX = (width - boardSize) / 2
+        val boardSize: Float = cellSizePixels*GRID_SIZE
+        when {
+            width < height -> {
+                startY = (height - boardSize) / 2
+                startX = 0f
+            }
+            height < width -> {
+                startX = (width - boardSize) / 2
+                startY = 0f
+            }
+            else -> {
+                startX = 0f
+                startY = 0f
+            }
         }
 
         noteSizePixels = cellSizePixels / SQRT_SIZE.toFloat()
-        noteTextPaint.textSize = cellSizePixels / SQRT_SIZE.toFloat()
+        noteTextPaint.textSize = (cellSizePixels / SQRT_SIZE.toFloat())
         textPaint.textSize = cellSizePixels / 1.5F
         invalidCellTextPaint.textSize = textPaint.textSize
         startingCellTextPaint.textSize = cellSizePixels / 1.5F
-        boardRectangle = listOf(startX+thickLinePaint.strokeWidth/2, startY+thickLinePaint.strokeWidth/2, startX+boardSize-thickLinePaint.strokeWidth/2, startY+boardSize-thickLinePaint.strokeWidth/2)
+
+        boardRectangle = listOf(
+            startX+thickLinePaint.strokeWidth/2,
+            startY+thickLinePaint.strokeWidth/2,
+            startX+boardSize-thickLinePaint.strokeWidth/2,
+            startY+boardSize-thickLinePaint.strokeWidth/2
+        )
     }
 
     private fun fillCells(canvas: Canvas) {
@@ -113,16 +142,27 @@ class SudokuBoardView(context: Context, attributeSet: AttributeSet) : View(conte
             return
         }
 
+        val cellSelectedIsStartingCell = cells?.get(selectedRow * GRID_SIZE + selectedCol)?.isStartingCell ?: false
+
         cells?.forEach { cell ->
             val r = cell.row
             val c = cell.col
 
             if (r == selectedRow && c == selectedCol) {
-                fillCell(canvas, r, c, startingCellPaint)
-            } else if (r == selectedRow || c == selectedCol) {
-                fillCell(canvas, r, c, conflictingCellPaint)
-            } else if (r / SQRT_SIZE == selectedRow / SQRT_SIZE && c / SQRT_SIZE == selectedCol / SQRT_SIZE) {
-                fillCell(canvas, r, c, conflictingCellPaint)
+                val paint =
+                    if (cell.isStartingCell)
+                        startingValidCellPaint
+                    else
+                        startingCellPaint
+                fillCell(canvas, r, c, paint)
+            } else if (r == selectedRow || c == selectedCol ||
+                (r / SQRT_SIZE == selectedRow / SQRT_SIZE && c / SQRT_SIZE == selectedCol / SQRT_SIZE)) {
+                val paint =
+                    if (cellSelectedIsStartingCell && cell.isStartingCell)
+                        conflictingValidCellPaint
+                    else
+                        conflictingCellPaint
+                fillCell(canvas, r, c, paint)
             }
         }
     }
@@ -135,7 +175,7 @@ class SudokuBoardView(context: Context, attributeSet: AttributeSet) : View(conte
     private fun drawLines(canvas: Canvas) {
         canvas.drawRect(boardRectangle[0], boardRectangle[1], boardRectangle[2], boardRectangle[3], thickLinePaint)
 
-        for (i in 1 until SIZE) {
+        for (i in 1 until GRID_SIZE) {
             val paintToUse = when (i % SQRT_SIZE) {
                 0 -> thickLinePaint
                 else -> thinLinePaint
@@ -214,6 +254,11 @@ class SudokuBoardView(context: Context, attributeSet: AttributeSet) : View(conte
         if (inGameBounds(x,y)) {
             val selectedRow = ((y - startY) / cellSizePixels).toInt()
             val selectedCol = ((x - startX) / cellSizePixels).toInt()
+            if(this.selectedCol == selectedCol && this.selectedRow == selectedRow) {
+                listener?.onCellTouched(-1,-1)
+                invalidate()
+                return true
+            }
             listener?.onCellTouched(selectedRow, selectedCol)
         } else {
             listener?.onCellTouched(-1,-1)

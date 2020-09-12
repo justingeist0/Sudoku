@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="menu"
+            type="com.fantasma.sudoku.ui.main.MainMenu" />
+
+        <variable
+            name="constant"
+            type="com.fantasma.sudoku.util.Constant" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/frameLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".ui.main.MainMenu">
+
+
+        <ImageView
+            android:id="@+id/logo_image"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_margin="40dp"
+            android:src="@drawable/sudokumainmenu"
+            app:layout_constraintBottom_toTopOf="@id/layout_buttons"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <LinearLayout
+            android:id="@+id/layout_buttons"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/logo_image">
+
+            <Button
+                android:id="@+id/new_game_btn"
+                style="@style/mainMenuButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="@{() -> menu.newGameBtnPressed()}"
+                android:text="@string/new_game" />
+
+            <Button
+                android:id="@+id/continue_game_btn"
+                style="@style/mainMenuButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="@{() -> menu.continueOrEasyPressed()}"
+                android:text="@string/continue_txt" />
+
+            <Button
+                android:id="@+id/solver_btn"
+                style="@style/mainMenuButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="@{() -> menu.solverOrIntermediatePressed()}"
+                android:text="@string/sudoku_solver" />
+
+            <Button
+                android:id="@+id/created_boards_btn"
+                style="@style/mainMenuButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="@{() -> menu.createdBoardOrHardPressed()}"
+                android:text="@string/created_boards" />
+
+            <Button
+                android:id="@+id/themes_btn"
+                style="@style/mainMenuButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="@{() -> menu.themesOrExpertPressed()}"
+                android:text="@string/themes" />
+
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

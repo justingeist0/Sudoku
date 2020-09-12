@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Sudoku</string>
+    <string name="app_name">Newspaper Sudoku</string>
     <string name="_1">1</string>
     <string name="_2">2</string>
     <string name="_3">3</string>
@@ -9,4 +9,19 @@
     <string name="_7">7</string>
     <string name="_8">8</string>
     <string name="_9">9</string>
+    <string name="background">background</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="new_game">New game</string>
+    <string name="continue_txt">Continue</string>
+    <string name="sudoku_solver">Sudoku Solver</string>
+    <string name="solver">Solver</string>
+    <string name="created_boards">Created Boards</string>
+
+    <string name="loading">Loading Board…</string>
+    <string name="back">Main Menu</string>
+    <string name="easy">Easy</string>
+    <string name="intermediate">Intermediate</string>
+    <string name="hard">Hard</string>
+    <string name="expert">Expert</string>
+    <string name="themes">Themes</string>
 </resources>
