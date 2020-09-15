@@ -2,7 +2,8 @@ package com.fantasma.sudoku.game
 
 import androidx.lifecycle.MutableLiveData
 import com.fantasma.sudoku.database.SudokuBoard
-import com.fantasma.sudoku.util.Constant.EASY
+import com.fantasma.sudoku.util.Constant.LOADING
+import com.fantasma.sudoku.util.Constant.SOLVER
 import com.fantasma.sudoku.util.Constant.SQRT_SIZE
 import kotlinx.coroutines.*
 
@@ -18,6 +19,11 @@ class SudokuGame {
     val deleteBtnEnabledLiveData = MutableLiveData<Boolean>()
     val helpAvailableLiveData = MutableLiveData<Boolean>()
     val headerLabelLiveData = MutableLiveData<Int>()
+    val timerLabelLiveData = MutableLiveData<String>()
+    var timer = 0L
+
+    //Must do tonight: Stop timer when finished, finish animation until leaves board, show ad
+
 
     private val actions: MutableList<Action> = mutableListOf()
     private var actionIdx = -1
@@ -28,9 +34,7 @@ class SudokuGame {
 
     private val board: Board = Board()
 
-    init {
-        initGame()
-    }
+    private var timerJob: Job? = null
 
     private fun initGame() {
         selectedRow = -1
@@ -40,7 +44,6 @@ class SudokuGame {
         cellsLiveData.postValue(board.cells)
         isTakingNotesLiveData.postValue(false)
         highlightedKeysLiveData.postValue(setOf())
-        gameWonLiveData.postValue(false)
         undoBtnEnabledLiveData.postValue(false)
         redoBtnEnabledLiveData.postValue(false)
         deleteBtnEnabledLiveData.postValue(false)
@@ -78,7 +81,7 @@ class SudokuGame {
                     updateButtonsEnabled()
                 }
 
-                if (filledIn == 81) {
+                if (filledIn >= 81) {
                     checkIfBoardComplete()
                 }
             } else {
@@ -92,15 +95,47 @@ class SudokuGame {
     fun postBoard(sudokuBoard: SudokuBoard, restart: Boolean = false) {
         board.setBoard(sudokuBoard, restart)
         initGame()
+        board.cells.forEach { if (it.value != 0) filledIn++ }
+        helpAvailableLiveData.postValue(sudokuBoard.boardDifficulty==SOLVER)
         headerLabelLiveData.postValue(sudokuBoard.boardDifficulty)
         gameIdLiveData.postValue(sudokuBoard.boardId)
-        board.cells.forEach { if (it.isStartingCell) filledIn++ }
+        timer = sudokuBoard.time
+        if(sudokuBoard.boardDifficulty == LOADING) {
+            timerLabelLiveData.postValue("")
+            stopTimer()
+        } else {
+            timerLabelLiveData.postValue(formatTime(timer))
+            startTimer()
+            checkIfBoardComplete()
+        }
+    }
+
+    fun startTimer() {
+        if(timerJob != null || board.isComplete()) return
+        timerJob = GlobalScope.launch(Dispatchers.Default) {
+            while(isActive) {
+                delay(1000)
+                timer++
+                timerLabelLiveData.postValue(formatTime(timer))
+            }
+        }
+    }
+
+    private fun formatTime(time: Long) : String =
+        "${time / 60}:${if((time%60)/10 >= 1) "" else "0"}${time % 60}"
+
+
+    private fun stopTimer() {
+        timerJob?.cancel()
+        timerJob = null
     }
 
     private fun checkIfBoardComplete() {
-        board.cells.forEach { cell ->
-            if (cell.conflictingCells != 0) return
+        if(board.isNotComplete()) {
+            gameWonLiveData.postValue(false)
+            return
         }
+        stopTimer()
         gameWonLiveData.postValue(true)
         gameIdLiveData.postValue(-1L)
     }
@@ -109,9 +144,9 @@ class SudokuGame {
         if (row == -1 || col == -1) {
             selectedRow = row
             selectedCol = col
-            selectedCellLiveData.postValue(Pair(row, col))
+            selectedCellLiveData.postValue(Pair(selectedRow, selectedCol))
             deleteBtnEnabledLiveData.postValue(false)
-            helpAvailableLiveData.postValue(false)
+            helpAvailableLiveData.postValue(board.difficulty() == SOLVER)
             return
         }
 
@@ -135,6 +170,11 @@ class SudokuGame {
         val cell = board.cells[undoAction.idx]
         val prevValue = cell.value
 
+        if(undoAction.valuePosted == 0)
+            filledIn--
+        else
+            filledIn++
+
         cell.value = undoAction.valuePosted
         undoAction.valuePosted = prevValue
 
@@ -152,6 +192,11 @@ class SudokuGame {
         val redoAction = actions[actionIdx]
         val cell = board.cells[redoAction.idx]
         val prevValue = cell.value
+
+        if(redoAction.valuePosted == 0)
+            filledIn--
+        else
+            filledIn++
 
         cell.value = redoAction.valuePosted
         redoAction.valuePosted = prevValue
@@ -178,6 +223,7 @@ class SudokuGame {
         val cellIdx = board.getIdx(selectedRow, selectedCol)
         val cell = board.cells[cellIdx]
 
+        filledIn--
         actionIdx++
         actions.add(actionIdx, Action(cell.value, cellIdx))
 
@@ -199,10 +245,17 @@ class SudokuGame {
     }
 
     fun setAnswerForSelected() {
-
+        if(board.difficulty() == SOLVER) {
+            solveInStyle()
+        } else {
+            if(board.setCorrectNumber(selectedRow, selectedCol)) //True if cell was 0
+                filledIn++
+            cellsLiveData.postValue(board.cells)
+            helpAvailableLiveData.postValue(false)
+        }
     }
 
-    fun solveInStyle() {
+    private fun solveInStyle() {
         val boardValues = Array(81) { i -> board.cells[i].value }
 
         val scope = CoroutineScope(Dispatchers.Default)
@@ -213,14 +266,19 @@ class SudokuGame {
                     conflictingCells = 0
                 }
                 cellsLiveData.postValue(board.cells)
-                Thread.sleep(20)
+                Thread.sleep(10L)
             }
+            filledIn = 81
+            checkIfBoardComplete()
         }
 
     }
 
     fun getSudokuBoard(): SudokuBoard? {
-        return board.getSudokuBoard()
+        val currentBoard = board.getSudokuBoard()
+        stopTimer()
+        currentBoard?.time = timer
+        return currentBoard
     }
 
     private fun updateButtonsEnabled() {

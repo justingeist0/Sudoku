@@ -9,7 +9,7 @@
         android:layout_height="match_parent"
         android:contentDescription="@string/background"
         android:scaleType="centerCrop"
-        android:src="@drawable/paper2" />
+        android:src="@drawable/background" />
 
     <fragment
         android:id="@+id/nav_host_fragment"

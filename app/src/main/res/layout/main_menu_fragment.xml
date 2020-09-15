@@ -4,10 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-
         <variable
             name="menu"
-            type="com.fantasma.sudoku.ui.main.MainMenu" />
+            type="com.fantasma.sudoku.ui.fragment.MainMenuFragment" />
 
         <variable
             name="constant"
@@ -18,7 +17,7 @@
         android:id="@+id/frameLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".ui.main.MainMenu">
+        tools:context=".ui.fragment.MainMenuFragment">
 
 
         <ImageView
@@ -26,7 +25,7 @@
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_margin="40dp"
-            android:src="@drawable/sudokumainmenu"
+            android:src="@drawable/menu_header_image"
             app:layout_constraintBottom_toTopOf="@id/layout_buttons"
             app:layout_constraintDimensionRatio="1:1"
             app:layout_constraintEnd_toEndOf="parent"
@@ -65,16 +64,16 @@
                 style="@style/mainMenuButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:onClick="@{() -> menu.solverOrIntermediatePressed()}"
-                android:text="@string/sudoku_solver" />
+                android:onClick="@{() -> menu.createdBoardOrIntermediatePressed()}"
+                android:text="@string/created_boards" />
 
             <Button
                 android:id="@+id/created_boards_btn"
                 style="@style/mainMenuButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:onClick="@{() -> menu.createdBoardOrHardPressed()}"
-                android:text="@string/created_boards" />
+                android:onClick="@{() -> menu.solverOrHardPressed()}"
+                android:text="@string/sudoku_solver" />
 
             <Button
                 android:id="@+id/themes_btn"
@@ -82,7 +81,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:onClick="@{() -> menu.themesOrExpertPressed()}"
-                android:text="@string/themes" />
+                tools:text="@string/darkTheme" />
 
         </LinearLayout>
 

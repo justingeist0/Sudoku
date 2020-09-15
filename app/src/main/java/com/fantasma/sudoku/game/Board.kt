@@ -1,12 +1,9 @@
 package com.fantasma.sudoku.game
-
-import android.util.Log
 import com.fantasma.sudoku.database.SudokuBoard
 import com.fantasma.sudoku.util.Constant
 import com.fantasma.sudoku.util.Constant.GRID_SIZE
-import com.fantasma.sudoku.util.Constant.SOLVER
 
-class Board() {
+class Board {
     val cells = List(GRID_SIZE * GRID_SIZE) { i -> Cell(i / GRID_SIZE, i % GRID_SIZE, 0) }
     private var currentBoard: SudokuBoard? = null
 
@@ -15,17 +12,14 @@ class Board() {
     fun setBoard(newBoard: SudokuBoard, restart: Boolean = false) {
         currentBoard = newBoard
 
-        if (newBoard.usersBoard.length < GRID_SIZE || newBoard.boardDifficulty == SOLVER) {
-            //Solver mode (Empty sudoku board)
-            cells.forEach {
-                it.value = 0
-                it.isStartingCell = false
-                it.notes.clear()
-            }
-            return
+        cells.forEach {
+            it.value = 0
+            it.isStartingCell = false
+            it.notes.clear()
+            it.conflictingCells = 0
         }
 
-        if(newBoard.startingBoard.length == GRID_SIZE* GRID_SIZE) {
+        if(newBoard.startingBoard.length == GRID_SIZE * GRID_SIZE) {
             val startingBoard = Array(cells.size) { i ->
                 Character.getNumericValue(newBoard.startingBoard[i])
             }
@@ -36,15 +30,20 @@ class Board() {
             }
         }
 
-        if(restart) return
-
-        val userBoard = Array(cells.size) { i ->
-            Character.getNumericValue(newBoard.usersBoard[i])
+        if(restart) {
+            newBoard.time = 0L
+            return
         }
-        for (i in cells.indices) {
-            if(cells[i].value == 0 && userBoard[i] > 0) {
-                cells[i].value = userBoard[i]
-                checkConflictingCells(cells[i], 0)
+
+        if(newBoard.usersBoard.length == GRID_SIZE * GRID_SIZE) {
+            val userBoard = Array(cells.size) { i ->
+                Character.getNumericValue(newBoard.usersBoard[i])
+            }
+            for (i in cells.indices) {
+                if (cells[i].value == 0 && userBoard[i] > 0) {
+                    cells[i].value = userBoard[i]
+                    checkConflictingCells(cells[i], 0)
+                }
             }
         }
     }
@@ -59,7 +58,6 @@ class Board() {
     }
 
     fun checkConflictingCells(cell: Cell, prevValue: Int) {
-        //Calculate conflicts with cells
         cell.conflictingCells = 0
         cells.forEach { conflictingCell ->
             val r = conflictingCell.row
@@ -77,4 +75,26 @@ class Board() {
         cell.conflictingCells -= 2 //Selected cell does not conflict with itself!
     }
 
+    fun difficulty() : Int? {
+        return currentBoard?.boardDifficulty
+    }
+
+    fun setCorrectNumber(selectedRow: Int, selectedCol: Int) : Boolean {
+        val idx = getIdx(selectedRow, selectedCol)
+        val correctValueChar: Char = currentBoard?.solvedBoard?.get(idx) ?: return false
+        val prevValue = cells[idx].value
+        cells[idx].value =
+            Character.getNumericValue(correctValueChar)
+        checkConflictingCells(cells[idx], prevValue)
+        return prevValue == 0
+    }
+
+    fun isNotComplete() : Boolean {
+        cells.forEach { cell ->
+            if (cell.conflictingCells != 0 || cell.value == 0) return true
+        }
+        return false
+    }
+
+    fun isComplete() : Boolean = !isNotComplete()
 }

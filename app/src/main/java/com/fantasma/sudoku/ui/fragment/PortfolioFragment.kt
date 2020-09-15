@@ -1,4 +1,4 @@
-package com.fantasma.sudoku.ui.main
+package com.fantasma.sudoku.ui.fragment
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -13,10 +13,9 @@ import com.fantasma.sudoku.R
 import com.fantasma.sudoku.adapter.CreatedBoardAdapter
 import com.fantasma.sudoku.database.SudokuBoardDatabase
 import com.fantasma.sudoku.databinding.PortfolioFragmentBinding
+import com.fantasma.sudoku.ui.viewmodel.PortfolioViewModel
 import com.fantasma.sudoku.util.Constant.DELETE_BOARD
 import com.fantasma.sudoku.util.SharedPrefs
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class PortfolioFragment : Fragment() {
@@ -39,7 +38,6 @@ class PortfolioFragment : Fragment() {
             when(action) {
                 DELETE_BOARD -> {
                     viewModel.deleteBoard(boardId)
-                   // binding.createdBoardsList.adapter?.notifyItemRemoved(boardId.toInt())
                 }
                 else -> navigateToBoard(boardId, action)
             }

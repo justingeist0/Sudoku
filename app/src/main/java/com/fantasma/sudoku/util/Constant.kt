@@ -18,8 +18,8 @@ object Constant {
     const val KEY_CONTINUE = "continue"
 
     const val KEY_THEME = "theme"
-    const val THEME_NEWSPAPER = 0
-    const val THEME_SOMBER = 1
+    const val THEME_LIGHT = 0
+    const val THEME_DARK = 1
 
     const val KEY_SHOW_CONFLICTING_CELLS = "conflict"
 

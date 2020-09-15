@@ -1,7 +1,6 @@
-package com.fantasma.sudoku.ui.main
+package com.fantasma.sudoku.ui.fragment
 
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -13,8 +12,10 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import com.fantasma.sudoku.R
 import com.fantasma.sudoku.database.SudokuBoard
-import com.fantasma.sudoku.databinding.MainFragmentBinding
+import com.fantasma.sudoku.database.SudokuBoardDatabase
+import com.fantasma.sudoku.databinding.SudokuFragmentBinding
 import com.fantasma.sudoku.game.Cell
+import com.fantasma.sudoku.ui.viewmodel.MainViewModel
 import com.fantasma.sudoku.util.Constant.DISABLED_BTN_ALPHA
 import com.fantasma.sudoku.util.Constant.EASY
 import com.fantasma.sudoku.util.Constant.EXPERT
@@ -28,26 +29,27 @@ import com.fantasma.sudoku.view.custom.SudokuBoardView
 
 class SudokuFragment : Fragment(), SudokuBoardView.OnTouchListener {
 
-    private lateinit var binding: MainFragmentBinding
+    private lateinit var binding: SudokuFragmentBinding
     private lateinit var numberButtons: Array<View>
     private val viewModel: MainViewModel by activityViewModels()
     private var mode: Int = 0
     private var isTakingNotes = false
-    private var headerText = Array(2) {""}
+    private var header = Array(2) {""}
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
 
         mode = SudokuFragmentArgs.fromBundle(requireArguments()).mode
 
+        val database = SudokuBoardDatabase.getInstance(requireContext()).sleepDataBaseDao
+        viewModel.setDatabase(database)
+
         binding = DataBindingUtil.inflate(
             inflater,
-            R.layout.main_fragment,
+            R.layout.sudoku_fragment,
             container,
             false
         )
-
-        Log.i("Sudoku:", "$mode")
 
         if(mode < SOLVER) {
             viewModel.postBoard(
@@ -86,11 +88,13 @@ class SudokuFragment : Fragment(), SudokuBoardView.OnTouchListener {
 
         viewModel.sudokuGame.deleteBtnEnabledLiveData.observe(viewLifecycleOwner, Observer {updateDeleteBtn(it)})
 
-        viewModel.sudokuGame.gameWonLiveData.observe(viewLifecycleOwner, Observer {})
+        viewModel.sudokuGame.gameWonLiveData.observe(viewLifecycleOwner, Observer {gameWon(it)})
 
         viewModel.sudokuGame.gameIdLiveData.observe(viewLifecycleOwner, Observer { SharedPrefs.updateBoardIdSharedPrefs(requireActivity(), it)})
 
         viewModel.sudokuGame.headerLabelLiveData.observe(viewLifecycleOwner, Observer { updateHeaderMode(it) })
+
+        viewModel.sudokuGame.timerLabelLiveData.observe(viewLifecycleOwner, Observer { updateTimer(it) })
 
         updateHeaderMode(LOADING)
 
@@ -98,13 +102,9 @@ class SudokuFragment : Fragment(), SudokuBoardView.OnTouchListener {
     }
 
     override fun onResume() {
+        viewModel.resumeTimer()
         super.onResume()
-        updateHeaderMode(
-
-        )
     }
-
-
 
     override fun onPause() {
         viewModel.saveBoard()
@@ -168,7 +168,7 @@ class SudokuFragment : Fragment(), SudokuBoardView.OnTouchListener {
 
     private fun updateHeaderMode(value: Int = mode) {
         mode = value
-        (requireActivity() as AppCompatActivity).supportActionBar?.title =
+        header[0] =
             when(mode) {
                 EASY -> getString(R.string.easy)
                 INTERMEDIATE -> getString(R.string.intermediate)
@@ -177,6 +177,23 @@ class SudokuFragment : Fragment(), SudokuBoardView.OnTouchListener {
                 SOLVER -> getString(R.string.sudoku_solver)
                 else -> getString(R.string.loading)
             }
+        updateHeader()
+    }
+
+    private fun updateTimer(timerTxt: String) {
+        header[1] = timerTxt
+        updateHeader()
+    }
+
+    private fun updateHeader(winningString: String = "") {
+        (requireActivity() as AppCompatActivity).supportActionBar?.title =
+            "${header[0]} \t ${header[1]}$winningString"
+    }
+
+    private fun gameWon(won: Boolean) {
+        if(won) {
+            updateHeader("✨\uD83C\uDF1F")
+        }
     }
 
     override fun onCellTouched(row: Int, col: Int) {

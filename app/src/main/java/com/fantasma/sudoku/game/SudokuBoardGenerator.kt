@@ -8,13 +8,7 @@ import com.fantasma.sudoku.util.Constant.HARD
 import com.fantasma.sudoku.util.Constant.INTERMEDIATE
 import java.util.Random
 
-fun main(args: Array<String>) {
-    val board = SudokuBoardGenerator()
-    board.generateBoard(EXPERT)
-}
-
-
-class SudokuBoardGenerator() {
+class SudokuBoardGenerator {
     private val board: Array<Int> = Array(GRID_SIZE * GRID_SIZE) {0}
 
     fun generateBoard(difficulty: Int) : SudokuBoard {
@@ -138,7 +132,7 @@ class SudokuBoardGenerator() {
             for(i in board.indices) {
                 if(board[i] == 0) {
                     val possibleDigits = getAvailableDigits(i, board)
-                    if(possibleDigits.count() <= 2) continue
+                    if(possibleDigits.count() <= 1) continue
                     var solutions = 0
                     for(p in possibleDigits) {
                         val boardCopy = board.clone()
@@ -167,7 +161,7 @@ class SudokuBoardGenerator() {
             if(availableDigits.size > 0)
                 truncateDigitsUsedInBox(idx, availableDigits, board)
 
-            return availableDigits.asIterable()
+            return availableDigits.asIterable().shuffled()
         }
 
         private fun truncateDigitsUsedInRow(idx: Int, availableDigits: MutableSet<Int>, board: Array<Int>) {
@@ -192,9 +186,9 @@ class SudokuBoardGenerator() {
             val start = ((idx / 3) * 3) - ((idx / 9) % 3) * 9 //Top left index of 3x3 grid
 
             for (i in start until start+3) {
-                for(j in 0..GRID_SIZE step(3)) {
+                for(j in 0..GRID_SIZE*2 step(GRID_SIZE)) {
                     if (board[i+j] != 0) {
-                        availableDigits.remove(board[i])
+                        availableDigits.remove(board[i+j])
                     }
                 }
             }

@@ -8,7 +8,6 @@ import android.view.MotionEvent
 import android.view.View
 import androidx.core.content.ContextCompat
 import com.fantasma.sudoku.R
-import com.fantasma.sudoku.database.SudokuBoard
 import com.fantasma.sudoku.game.Cell
 import com.fantasma.sudoku.util.Constant.GRID_SIZE
 import com.fantasma.sudoku.util.Constant.SQRT_SIZE
@@ -29,19 +28,19 @@ class SudokuBoardView(context: Context, attributeSet: AttributeSet) : View(conte
     private var selectedRow = -1
     private var selectedCol = -1
 
-    private var listener: SudokuBoardView.OnTouchListener? = null
+    private var listener: OnTouchListener? = null
 
     private var cells: List<Cell>? = null
 
     private val thickLinePaint = Paint().apply {
         style = Paint.Style.STROKE
-        color = Color.BLACK
+        color = ContextCompat.getColor(getContext(), R.color.text)
         strokeWidth = 8F
     }
 
     private val thinLinePaint = Paint().apply {
         style = Paint.Style.STROKE
-        color = Color.BLACK
+        color = ContextCompat.getColor(getContext(), R.color.text)
         strokeWidth = 2F
     }
 
@@ -57,12 +56,12 @@ class SudokuBoardView(context: Context, attributeSet: AttributeSet) : View(conte
 
     private val textPaint = Paint().apply {
         style = Paint.Style.FILL_AND_STROKE
-        color = Color.BLACK
+        color = ContextCompat.getColor(getContext(), R.color.text)
     }
 
     private val startingCellTextPaint = Paint().apply {
         style = Paint.Style.FILL_AND_STROKE
-        color = Color.BLACK
+        color = ContextCompat.getColor(getContext(), R.color.text)
         typeface = Typeface.DEFAULT_BOLD
     }
 
@@ -73,7 +72,7 @@ class SudokuBoardView(context: Context, attributeSet: AttributeSet) : View(conte
 
     private val noteTextPaint = Paint().apply {
         style = Paint.Style.FILL_AND_STROKE
-        color = Color.BLACK
+        color = ContextCompat.getColor(getContext(), R.color.text)
     }
 
     private val startingCellPaint = Paint().apply {

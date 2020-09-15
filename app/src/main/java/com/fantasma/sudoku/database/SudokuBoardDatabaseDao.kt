@@ -24,8 +24,8 @@ interface SudokuBoardDatabaseDao {
     @Query("SELECT COUNT(*) from sudoku_board_table WHERE board_difficulty = :difficulty and board_used = 0")
     fun getNumberOfBoards(difficulty: Int): Int
 
-    @Query("SELECT COUNT(*) from sudoku_board_table WHERE board_used = 1")
-    fun getNumberOfCreatedBoards(): Long
+    @Query("SELECT * from sudoku_board_table WHERE board_used = 1 ORDER BY created_board DESC limit 1")
+    fun getLastCreatedBoard(): SudokuBoard?
 
     @Query("SELECT * from sudoku_board_table WHERE board_used = 1 ORDER BY created_board DESC")
     fun getAllBoards(): LiveData<List<SudokuBoard>> //Live data so if user selected existing board they can go back to portfolio and their board in the view is updated automatically

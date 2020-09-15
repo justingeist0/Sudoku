@@ -6,5 +6,5 @@ class Cell(
     var value: Int,
     var isStartingCell: Boolean = false,
     var conflictingCells: Int = 0,
-    var notes: MutableSet<Int> = mutableSetOf<Int>()
+    var notes: MutableSet<Int> = mutableSetOf()
 )

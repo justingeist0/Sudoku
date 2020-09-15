@@ -3,11 +3,12 @@ package com.fantasma.sudoku.database
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.fantasma.sudoku.util.Constant.LOADING
 
 @Entity(tableName = "sudoku_board_table")
 data class SudokuBoard(
     @ColumnInfo(name = "board_difficulty")
-    val boardDifficulty: Int = -1,
+    val boardDifficulty: Int = LOADING,
 
     @ColumnInfo(name = "starting_board")
     val startingBoard: String = "0",

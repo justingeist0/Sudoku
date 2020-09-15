@@ -23,5 +23,16 @@
     <string name="intermediate">Intermediate</string>
     <string name="hard">Hard</string>
     <string name="expert">Expert</string>
-    <string name="themes">Themes</string>
+
+    <string name="darkTheme">Dark Theme 🔳️</string>
+    <string name="lightTheme">Light Theme 🔲</string>
+    <string name="this_cannot_be_undone">This cannot be undone</string>
+    <string name="cancel">Cancel</string>
+    <string name="confirm">Confirm</string>
+    <string name="delete_board">Delete Board?</string>
+    <string name="restart_board">Restart Board?</string>
+    <string name="resume">Resume</string>
+    <string name="view">View</string>
+    <string name="delete">Delete</string>
+    <string name="restart">Restart</string>
 </resources>

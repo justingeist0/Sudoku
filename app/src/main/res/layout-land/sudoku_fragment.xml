@@ -15,15 +15,15 @@
         android:id="@+id/main"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".ui.main.SudokuFragment">
+        tools:context=".ui.fragment.SudokuFragment">
 
         <com.fantasma.sudoku.view.custom.SudokuBoardView
             android:id="@+id/game_layout"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_margin="7dp"
-            app:layout_constraintBottom_toTopOf="@id/numbers_layout"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/mistake_management_layout"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -37,7 +37,7 @@
             android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/numbers_layout"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toEndOf="@id/game_layout"
             app:layout_constraintTop_toTopOf="@id/numbers_layout">
 
             <ImageButton
@@ -83,9 +83,8 @@
             android:layout_marginBottom="6dp"
             android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/help_layout"
-            app:layout_constraintStart_toEndOf="@id/mistake_management_layout"
-            app:layout_constraintTop_toBottomOf="@id/game_layout">
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/mistake_management_layout">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -193,15 +192,15 @@
 
         <LinearLayout
             android:id="@+id/help_layout"
-            android:layout_width="50dp"
-            android:layout_height="0dp"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
             android:layout_marginEnd="6dp"
             android:layout_marginBottom="6dp"
-            android:orientation="vertical"
+            android:orientation="horizontal"
             android:weightSum="3"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@id/numbers_layout">
+            app:layout_constraintBottom_toTopOf="@id/numbers_layout"
+            app:layout_constraintStart_toStartOf="@id/numbers_layout"
+            app:layout_constraintEnd_toEndOf="parent">
 
             <ImageButton
                 android:id="@+id/help_btn"

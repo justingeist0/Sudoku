@@ -1,7 +1,6 @@
-package com.fantasma.sudoku.ui.main
+package com.fantasma.sudoku.ui.viewmodel
 
 import android.util.Log
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import com.fantasma.sudoku.database.SudokuBoard
 import com.fantasma.sudoku.database.SudokuBoardDatabaseDao
@@ -9,13 +8,11 @@ import com.fantasma.sudoku.game.SudokuBoardGenerator
 import com.fantasma.sudoku.game.SudokuGame
 import com.fantasma.sudoku.util.Constant.BOARD_BACKLOG
 import com.fantasma.sudoku.util.Constant.EASY
-import com.fantasma.sudoku.util.Constant.EXISTING_BOARD
 import com.fantasma.sudoku.util.Constant.EXPERT
 import com.fantasma.sudoku.util.Constant.HARD
 import com.fantasma.sudoku.util.Constant.INTERMEDIATE
 import com.fantasma.sudoku.util.Constant.SOLVER
 import kotlinx.coroutines.*
-import java.lang.Exception
 
 class MainViewModel : ViewModel() {
     val sudokuGame = SudokuGame()
@@ -31,15 +28,15 @@ class MainViewModel : ViewModel() {
     fun setDatabase(databaseDao: SudokuBoardDatabaseDao) {
         database = databaseDao
         uiScope.launch {
-           // nuke()
            beginGeneratingBoards()
         }
 
     }
 
     private suspend fun beginGeneratingBoards() {
-        val sudokuBoardGenerator = SudokuBoardGenerator()
         generatorScope.launch {
+            val sudokuBoardGenerator = SudokuBoardGenerator()
+
             var difficulty = EASY
             var standByEasyBoardsCreated = getNumberOfBoards(EASY)
             var standByIntermediateBoardsCreated = getNumberOfBoards(INTERMEDIATE)
@@ -91,11 +88,11 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    private suspend fun nuke() {
-        withContext(Dispatchers.IO) {
-            database.nukeTable()
-        }
-    }
+//    private suspend fun nuke() {
+//        withContext(Dispatchers.IO) {
+//            database.nukeTable()
+//        }
+//    }
 
     fun requestBoard(mode: Int) {
         uiScope.launch {
@@ -115,6 +112,10 @@ class MainViewModel : ViewModel() {
         }
     }
 
+    fun resumeTimer() {
+        sudokuGame.startTimer()
+    }
+
     fun saveBoard() {
         val board = sudokuGame.getSudokuBoard() ?: return
         uiScope.launch {
@@ -132,7 +133,7 @@ class MainViewModel : ViewModel() {
 
     private suspend fun getTotalCreatedBoards() : Long {
         return withContext(Dispatchers.IO) {
-            database.getNumberOfCreatedBoards()
+            database.getLastCreatedBoard()?.createdBoard ?: 0L
         }
     }
 
@@ -143,14 +144,8 @@ class MainViewModel : ViewModel() {
     }
 
     private suspend fun getEmptyBoard() : SudokuBoard {
-        insertBoard(SudokuBoard())
+        insertBoard(SudokuBoard(boardDifficulty = SOLVER))
         return getNewBoard(SOLVER)
-    }
-
-    private suspend fun getLastBoard() : SudokuBoard? {
-        return withContext(Dispatchers.IO) {
-            database.getLastBoard()
-        }
     }
 
     private suspend fun getNewBoard(difficulty: Int) : SudokuBoard {
@@ -167,7 +162,6 @@ class MainViewModel : ViewModel() {
         return withContext(Dispatchers.Default) {
             var board = getNewGameFromDatabase(difficulty)
             while(board == null) {
-                Thread.sleep(1000)
                 board = getNewGameFromDatabase(difficulty)
             }
             board!!

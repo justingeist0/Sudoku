@@ -1,4 +1,4 @@
-package com.fantasma.sudoku.ui.main
+package com.fantasma.sudoku.ui.viewmodel
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel

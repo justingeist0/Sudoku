@@ -4,11 +4,13 @@
     <color name="colorPrimaryDark">#1E1E1E</color>
     <color name="colorAccent">#888888</color>
 
-    <color name="selectedCellBackground">#80B5B5B5</color>
-    <color name="conflictingCellBackground">#80E1E1E1</color>
+    <color name="selectedCellBackground">#1F000000</color>
+    <color name="conflictingCellBackground">#0D000000</color>
     <color name="selectedValidCellBackground">#8026FF00</color>
     <color name="conflictingValidCellBackground">#3326FF00</color>
     <color name="defaultCellBackground">#00000000</color>
-    <color name="cellBackground">#EAEAEA</color>
+    <color name="menuButtonBackground">#121212</color>
     <color name="invalidCellText">#8A0000</color>
+    <color name="text">#000000</color>
+    <color name="dialogBackground">#FFFFFF</color>
 </resources>

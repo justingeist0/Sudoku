@@ -1,5 +1,9 @@
 package com.fantasma.sudoku.adapter
 
+import android.app.Dialog
+import android.content.Context
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
@@ -15,6 +19,7 @@ import com.fantasma.sudoku.util.Constant.EXPERT
 import com.fantasma.sudoku.util.Constant.HARD
 import com.fantasma.sudoku.util.Constant.INTERMEDIATE
 import com.fantasma.sudoku.util.Constant.RESTART_EXISTING_BOARD
+import kotlinx.android.synthetic.main.confirm_dialog.*
 
 class CreatedBoardAdapter(val listener: ClickListener) : RecyclerView.Adapter<CreatedBoardAdapter.BoardViewHolder>() {
 
@@ -59,10 +64,10 @@ class CreatedBoardAdapter(val listener: ClickListener) : RecyclerView.Adapter<Cr
             val getString: (Int) -> String = {id ->
                 binding.root.context.getString(id)
             }
+            boardValues.setBoard(board)
+            val complete = boardValues.isComplete()
             with(binding) {
-                boardValues.setBoard(board)
                 boardView.updateCells(boardValues.cells)
-
                 boardTypeTxt.text =
                     when(board.boardDifficulty) {
                         EASY -> getString(R.string.easy)
@@ -72,23 +77,59 @@ class CreatedBoardAdapter(val listener: ClickListener) : RecyclerView.Adapter<Cr
                         else -> getString(R.string.solver)
                     }
 
-                timeTxt.text = "0.00"
+                val time = if(complete)
+                    "⌛️" + formatTime(board.time) + " \uD83C\uDF1F"
+                else
+                    "⏳" + formatTime(board.time)
+
+                timeTxt.text = time
 
                 resumeBtn.setOnClickListener {
                     listener.onClick(board, EXISTING_BOARD)
                 }
 
+                resumeBtn.text =
+                    if(complete)
+                        getString(R.string.view)
+                    else
+                        getString(R.string.resume)
+
                 restartBtn.setOnClickListener {
-                    listener.onClick(board, RESTART_EXISTING_BOARD)
+                    showConfirmDialog(binding.root.context, getString(R.string.restart_board)) {
+                        listener.onClick(board, RESTART_EXISTING_BOARD)
+                    }
                 }
 
                 itemDeleteBtn.setOnClickListener {
-                    listener.onClick(board, DELETE_BOARD)
-                    notifyDelete()
+                    showConfirmDialog(binding.root.context, getString(R.string.delete_board)) {
+                        listener.onClick(board, DELETE_BOARD)
+                        notifyDelete()
+                    }
                 }
 
             }
         }
+
+        private fun showConfirmDialog(context: Context, headerTxt: String, confirm: () -> Unit) {
+            val confirmDialog = Dialog(context)
+            confirmDialog.setCancelable(true)
+            confirmDialog.setContentView(R.layout.confirm_dialog)
+            confirmDialog.confirm_btn.setOnClickListener {
+                confirm()
+                confirmDialog.cancel()
+            }
+            confirmDialog.cancel_btn.setOnClickListener {
+                confirmDialog.cancel()
+            }
+            confirmDialog.header_txt.text = headerTxt
+            confirmDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            confirmDialog.window?.attributes?.windowAnimations = R.style.dialogAnimation
+            confirmDialog.show()
+        }
+
+        private fun formatTime(time: Long) : String =
+            "${time / 60}:${if((time%60)/10 >= 1) "" else "0"}${time % 60}"
+
     }
 
     class ClickListener(val listener: (boardId: Long, action: Int) -> Unit) {
