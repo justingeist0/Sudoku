@@ -247,7 +247,7 @@ class SudokuGame {
     }
 
     fun setAnswerForSelected() {
-        if(adShown) {
+        if(true) {
             if (board.difficulty() == SOLVER) {
                 solveInStyle()
             } else {
