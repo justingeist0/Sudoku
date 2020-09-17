@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.activityViewModels
@@ -93,33 +94,23 @@ class MainMenuFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val desiredTheme = SharedPrefs.getThemePref(requireActivity())
-        if(themeButtonTxt == getString(R.string.darkTheme) && desiredTheme == THEME_DARK) {
+        if((themeButtonTxt == getString(R.string.darkTheme) && desiredTheme == THEME_DARK) ||
+            (themeButtonTxt == getString(R.string.lightTheme) && desiredTheme == THEME_LIGHT)) {
             themesOrExpertPressed()
         }
 
         super.onViewCreated(view, savedInstanceState)
     }
 
-    override fun onResume() {
-        updateContinueBtn()
-        super.onResume()
-    }
-
-    private fun updateContinueBtn() {
-        val sharedPrefs =
-            requireActivity().getSharedPreferences(KEY_PREFERENCES, Context.MODE_PRIVATE)
-        val continueBoardId = sharedPrefs.getLong(KEY_CONTINUE, -1L)
-        enableContinueBtn(continueBoardId != -1L)
-    }
-
-    private fun enableContinueBtn(enabled: Boolean) {
-        binding.continueGameBtn.isEnabled = enabled
-        binding.continueGameBtn.alpha = if (enabled) 1f else DISABLED_BTN_ALPHA
-    }
-
     fun continueOrEasyPressed() {
         if (showMainMenu) {
-            navigateToSudokuFragment(EXISTING_BOARD)
+            val sharedPrefs =
+                requireActivity().getSharedPreferences(KEY_PREFERENCES, Context.MODE_PRIVATE)
+            val continueBoardId = sharedPrefs.getLong(KEY_CONTINUE, -1L)
+            if(continueBoardId == -1L)
+                Toast.makeText(requireContext(), "No board to continue.", Toast.LENGTH_SHORT).show()
+            else
+                navigateToSudokuFragment(EXISTING_BOARD)
         } else {
             //EASY BUTTON PRESSED
             navigateToSudokuFragment(EASY)

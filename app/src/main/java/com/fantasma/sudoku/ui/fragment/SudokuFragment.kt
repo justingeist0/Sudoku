@@ -5,6 +5,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
@@ -18,6 +19,7 @@ import com.fantasma.sudoku.game.Cell
 import com.fantasma.sudoku.ui.viewmodel.MainViewModel
 import com.fantasma.sudoku.util.Constant.DISABLED_BTN_ALPHA
 import com.fantasma.sudoku.util.Constant.EASY
+import com.fantasma.sudoku.util.Constant.EXISTING_BOARD
 import com.fantasma.sudoku.util.Constant.EXPERT
 import com.fantasma.sudoku.util.Constant.HARD
 import com.fantasma.sudoku.util.Constant.INTERMEDIATE
@@ -26,6 +28,13 @@ import com.fantasma.sudoku.util.Constant.RESTART_EXISTING_BOARD
 import com.fantasma.sudoku.util.Constant.SOLVER
 import com.fantasma.sudoku.util.SharedPrefs
 import com.fantasma.sudoku.view.custom.SudokuBoardView
+import com.google.android.gms.ads.AdError
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.LoadAdError
+import com.google.android.gms.ads.rewarded.RewardItem
+import com.google.android.gms.ads.rewarded.RewardedAd
+import com.google.android.gms.ads.rewarded.RewardedAdCallback
+import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
 
 class SudokuFragment : Fragment(), SudokuBoardView.OnTouchListener {
 
@@ -35,6 +44,36 @@ class SudokuFragment : Fragment(), SudokuBoardView.OnTouchListener {
     private var mode: Int = 0
     private var isTakingNotes = false
     private var header = Array(2) {""}
+    private lateinit var rewardedAd: RewardedAd
+    private lateinit var adReadyText: String
+    private val adLoadCallback = object: RewardedAdLoadCallback() {
+        override fun onRewardedAdLoaded() {
+            super.onRewardedAdLoaded()
+            if(adReadyText.isNotEmpty())
+                Toast.makeText(requireContext(), adReadyText, Toast.LENGTH_SHORT).show()
+        }
+    }
+    private val adCallback = object: RewardedAdCallback() {
+        override fun onUserEarnedReward(p0: RewardItem) {
+            viewModel.adFinished()
+            loadAd()
+        }
+
+        override fun onRewardedAdFailedToShow(p0: AdError?) {
+            super.onRewardedAdFailedToShow(p0)
+            loadAd()
+        }
+    }
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        loadAd()
+    }
+
+    private fun loadAd() {
+        rewardedAd = RewardedAd(requireActivity(), "ca-app-pub-1475221072762577/1769151783")
+        rewardedAd.loadAd(AdRequest.Builder().build(), adLoadCallback)
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
@@ -63,6 +102,13 @@ class SudokuFragment : Fragment(), SudokuBoardView.OnTouchListener {
         binding.sudokuGame = viewModel.sudokuGame
         binding.gameLayout.registerListener(this)
 
+        adReadyText =
+            when (mode) {
+                EXISTING_BOARD -> ""
+                SOLVER -> getString(R.string.solverAdToast)
+                else -> getString(R.string.newGameAdToast)
+            }
+
         numberButtons = arrayOf(
             binding.numberBtn1, binding.numberBtn2, binding.numberBtn3,
             binding.numberBtn4, binding.numberBtn5, binding.numberBtn6,
@@ -89,12 +135,15 @@ class SudokuFragment : Fragment(), SudokuBoardView.OnTouchListener {
         viewModel.sudokuGame.deleteBtnEnabledLiveData.observe(viewLifecycleOwner, Observer {updateDeleteBtn(it)})
 
         viewModel.sudokuGame.gameWonLiveData.observe(viewLifecycleOwner, Observer {gameWon(it)})
+        viewModel.sudokuGame.gameWonAnimationLiveData.observe(viewLifecycleOwner, Observer {gameWonParty(it)})
 
         viewModel.sudokuGame.gameIdLiveData.observe(viewLifecycleOwner, Observer { SharedPrefs.updateBoardIdSharedPrefs(requireActivity(), it)})
 
         viewModel.sudokuGame.headerLabelLiveData.observe(viewLifecycleOwner, Observer { updateHeaderMode(it) })
 
         viewModel.sudokuGame.timerLabelLiveData.observe(viewLifecycleOwner, Observer { updateTimer(it) })
+
+        viewModel.sudokuGame.showAdLiveData.observe(viewLifecycleOwner, Observer {showAd(it)})
 
         updateHeaderMode(LOADING)
 
@@ -187,13 +236,26 @@ class SudokuFragment : Fragment(), SudokuBoardView.OnTouchListener {
 
     private fun updateHeader(winningString: String = "") {
         (requireActivity() as AppCompatActivity).supportActionBar?.title =
-            "${header[0]} \t ${header[1]}$winningString"
+            "${header[0]}    ${header[1]}$winningString"
     }
 
     private fun gameWon(won: Boolean) {
         if(won) {
-            updateHeader("✨\uD83C\uDF1F")
+            updateHeader(" \uD83C\uDF1F")
+            adReadyText = ""
+
         }
+    }
+
+    private fun gameWonParty(animate: Boolean) {
+        if(animate) {
+            binding.gameLayout.winAnimation()
+        }
+    }
+
+    private fun showAd(showAd: Boolean) {
+        if(!showAd) return
+        rewardedAd.show(requireActivity(), adCallback)
     }
 
     override fun onCellTouched(row: Int, col: Int) {

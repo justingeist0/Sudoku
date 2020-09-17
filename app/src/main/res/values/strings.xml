@@ -10,7 +10,6 @@
     <string name="_8">8</string>
     <string name="_9">9</string>
     <string name="background">background</string>
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="new_game">New game</string>
     <string name="continue_txt">Continue</string>
     <string name="sudoku_solver">Sudoku Solver</string>
@@ -35,4 +34,7 @@
     <string name="view">View</string>
     <string name="delete">Delete</string>
     <string name="restart">Restart</string>
+    <string name="solverAdToast">Click light bulb when ready to solve.</string>
+    <string name="newGameAdToast">Hint available by clicking light bulb.</string>
+    <string name="mainMenuHeader">Newspaper Sudoku🗞 📰</string>
 </resources>

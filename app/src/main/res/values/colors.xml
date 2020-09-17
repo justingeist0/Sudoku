@@ -4,8 +4,8 @@
     <color name="colorPrimaryDark">#1E1E1E</color>
     <color name="colorAccent">#888888</color>
 
-    <color name="selectedCellBackground">#1F000000</color>
-    <color name="conflictingCellBackground">#0D000000</color>
+    <color name="selectedCellBackground">#CCD3D3D3</color>
+    <color name="conflictingCellBackground">#59D3D3D3</color>
     <color name="selectedValidCellBackground">#8026FF00</color>
     <color name="conflictingValidCellBackground">#3326FF00</color>
     <color name="defaultCellBackground">#00000000</color>

@@ -8,7 +8,7 @@
     <fragment
         android:id="@+id/mainMenu"
         android:name="com.fantasma.sudoku.ui.fragment.MainMenuFragment"
-        android:label="Newspaper Sudoku🗞 📰"
+        android:label="@string/mainMenuHeader"
         tools:layout="@layout/main_menu_fragment" >
         <action
             android:id="@+id/action_mainMenu_to_portfolioFragment"

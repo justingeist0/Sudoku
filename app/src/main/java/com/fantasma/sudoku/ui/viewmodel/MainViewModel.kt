@@ -19,8 +19,7 @@ class MainViewModel : ViewModel() {
 
     private lateinit var database: SudokuBoardDatabaseDao
 
-    private val generatorJob = Job()
-    private val generatorScope = CoroutineScope(Dispatchers.Default + generatorJob)
+    private var generatorJob: Job? = null
 
     private val uiJob = Job()
     private val uiScope = CoroutineScope(Dispatchers.Main + uiJob)
@@ -34,7 +33,8 @@ class MainViewModel : ViewModel() {
     }
 
     private suspend fun beginGeneratingBoards() {
-        generatorScope.launch {
+        if(generatorJob?.isActive == true) return
+        generatorJob = GlobalScope.launch(Dispatchers.Default) {
             val sudokuBoardGenerator = SudokuBoardGenerator()
 
             var difficulty = EASY
@@ -162,10 +162,16 @@ class MainViewModel : ViewModel() {
         return withContext(Dispatchers.Default) {
             var board = getNewGameFromDatabase(difficulty)
             while(board == null) {
+                delay(1000)
                 board = getNewGameFromDatabase(difficulty)
             }
             board!!
         }
+    }
+
+    fun adFinished() {
+        sudokuGame.adShown = true
+        sudokuGame.setAnswerForSelected()
     }
 
 }

@@ -60,13 +60,19 @@ class CreatedBoardAdapter(val listener: ClickListener) : RecyclerView.Adapter<Cr
     class BoardViewHolder(private val binding: ItemBoardBinding) : RecyclerView.ViewHolder(binding.root) {
         private val boardValues = Board()
 
+        init {
+
+        }
+
         fun bind(board: SudokuBoard, listener: ClickListener, notifyDelete: () -> Unit) {
             val getString: (Int) -> String = {id ->
                 binding.root.context.getString(id)
             }
+
             boardValues.setBoard(board)
             val complete = boardValues.isComplete()
             with(binding) {
+                boardView.createdBoardView = true
                 boardView.updateCells(boardValues.cells)
                 boardTypeTxt.text =
                     when(board.boardDifficulty) {

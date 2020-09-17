@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Sudoku del Periódico</string>
+    <string name="background">el fondo</string>
+    <string name="new_game">Nuevo Juego</string>
+    <string name="continue_txt">Continuar</string>
+    <string name="sudoku_solver">El Solucionador</string>
+    <string name="solver">Solucionador</string>
+    <string name="created_boards">Tablas Creadas</string>
+    <string name="loading">Esperar…</string>
+    <string name="back">Menú Principal</string>
+    <string name="easy">Cómodo</string>
+    <string name="intermediate">Intermedio</string>
+    <string name="hard">Difícil</string>
+    <string name="expert">Experto</string>
+    <string name="darkTheme">Tema Oscuro🔳️</string>
+    <string name="lightTheme">Tema de la Luz 🔲</string>
+    <string name="this_cannot_be_undone">Esto no se puede deshacer</string>
+    <string name="cancel">Cancelar</string>
+    <string name="confirm">Confirmar</string>
+    <string name="delete_board">¿Eliminar Tablero?</string>
+    <string name="restart_board">¿Reiniciar Tablero?</string>
+    <string name="resume">Continuar</string>
+    <string name="view">Ver</string>
+    <string name="delete">Borrar</string>
+    <string name="restart">Reiniciar</string>
+    <string name="solverAdToast">Haga Clic en la luz cuando esté listo para resolver.</string>
+    <string name="newGameAdToast">Sugerencia disponible haciendo clic en la luz.</string>
+    <string name="_1">1</string>
+    <string name="_2">2</string>
+    <string name="_3">3</string>
+    <string name="_4">4</string>
+    <string name="_5">5</string>
+    <string name="_6">6</string>
+    <string name="_7">7</string>
+    <string name="_8">8</string>
+    <string name="_9">9</string>
+    <string name="mainMenuHeader">Sudoku del Periódico🗞 📰</string>
+</resources>

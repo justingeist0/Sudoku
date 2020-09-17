@@ -97,4 +97,8 @@ class Board {
     }
 
     fun isComplete() : Boolean = !isNotComplete()
+
+    fun setTime(time: Long) {
+        currentBoard?.time = time
+    }
 }

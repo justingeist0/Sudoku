@@ -12,7 +12,6 @@ class SudokuGame {
     val cellsLiveData = MutableLiveData<List<Cell>>()
     val isTakingNotesLiveData = MutableLiveData<Boolean>()
     val highlightedKeysLiveData = MutableLiveData<Set<Int>>()
-    val gameWonLiveData = MutableLiveData<Boolean>()
     val gameIdLiveData = MutableLiveData<Long>()
     val undoBtnEnabledLiveData = MutableLiveData<Boolean>()
     val redoBtnEnabledLiveData = MutableLiveData<Boolean>()
@@ -20,9 +19,11 @@ class SudokuGame {
     val helpAvailableLiveData = MutableLiveData<Boolean>()
     val headerLabelLiveData = MutableLiveData<Int>()
     val timerLabelLiveData = MutableLiveData<String>()
-    var timer = 0L
-
-    //Must do tonight: Stop timer when finished, finish animation until leaves board, show ad
+    val showAdLiveData = MutableLiveData<Boolean>(false)
+    val gameWonLiveData = MutableLiveData<Boolean>()
+    val gameWonAnimationLiveData = MutableLiveData<Boolean>(false)
+    var adShown = false
+    private var timer = 0L
 
 
     private val actions: MutableList<Action> = mutableListOf()
@@ -35,6 +36,8 @@ class SudokuGame {
     private val board: Board = Board()
 
     private var timerJob: Job? = null
+    private var solveJob: Job? = null
+    private var animate = false
 
     private fun initGame() {
         selectedRow = -1
@@ -48,9 +51,12 @@ class SudokuGame {
         redoBtnEnabledLiveData.postValue(false)
         deleteBtnEnabledLiveData.postValue(false)
         helpAvailableLiveData.postValue(false)
+        gameWonAnimationLiveData.postValue(false)
         actions.clear()
         actionIdx = -1
         filledIn = 0
+        animate = false
+        board.cells.forEach { if (it.value != 0) filledIn++ }
     }
 
     fun handleInput(number: Int) {
@@ -82,6 +88,7 @@ class SudokuGame {
                 }
 
                 if (filledIn >= 81) {
+                    animate = true
                     checkIfBoardComplete()
                 }
             } else {
@@ -95,7 +102,6 @@ class SudokuGame {
     fun postBoard(sudokuBoard: SudokuBoard, restart: Boolean = false) {
         board.setBoard(sudokuBoard, restart)
         initGame()
-        board.cells.forEach { if (it.value != 0) filledIn++ }
         helpAvailableLiveData.postValue(sudokuBoard.boardDifficulty==SOLVER)
         headerLabelLiveData.postValue(sudokuBoard.boardDifficulty)
         gameIdLiveData.postValue(sudokuBoard.boardId)
@@ -126,16 +132,23 @@ class SudokuGame {
 
 
     private fun stopTimer() {
+        solveJob?.cancel()
+        solveJob = null
+
         timerJob?.cancel()
         timerJob = null
+
+        board.setTime(timer)
     }
 
     private fun checkIfBoardComplete() {
         if(board.isNotComplete()) {
             gameWonLiveData.postValue(false)
+            gameWonAnimationLiveData.postValue(false)
             return
         }
         stopTimer()
+        gameWonAnimationLiveData.postValue(animate)
         gameWonLiveData.postValue(true)
         gameIdLiveData.postValue(-1L)
     }
@@ -170,11 +183,6 @@ class SudokuGame {
         val cell = board.cells[undoAction.idx]
         val prevValue = cell.value
 
-        if(undoAction.valuePosted == 0)
-            filledIn--
-        else
-            filledIn++
-
         cell.value = undoAction.valuePosted
         undoAction.valuePosted = prevValue
 
@@ -192,11 +200,6 @@ class SudokuGame {
         val redoAction = actions[actionIdx]
         val cell = board.cells[redoAction.idx]
         val prevValue = cell.value
-
-        if(redoAction.valuePosted == 0)
-            filledIn--
-        else
-            filledIn++
 
         cell.value = redoAction.valuePosted
         redoAction.valuePosted = prevValue
@@ -223,7 +226,6 @@ class SudokuGame {
         val cellIdx = board.getIdx(selectedRow, selectedCol)
         val cell = board.cells[cellIdx]
 
-        filledIn--
         actionIdx++
         actions.add(actionIdx, Action(cell.value, cellIdx))
 
@@ -245,21 +247,27 @@ class SudokuGame {
     }
 
     fun setAnswerForSelected() {
-        if(board.difficulty() == SOLVER) {
-            solveInStyle()
+        if(adShown) {
+            if (board.difficulty() == SOLVER) {
+                solveInStyle()
+            } else {
+                if (board.setCorrectNumber(selectedRow, selectedCol)) //True if cell was 0
+                    filledIn++
+                cellsLiveData.postValue(board.cells)
+                helpAvailableLiveData.postValue(false)
+                if (filledIn >= 81)
+                    checkIfBoardComplete()
+            }
+            adShown = false
         } else {
-            if(board.setCorrectNumber(selectedRow, selectedCol)) //True if cell was 0
-                filledIn++
-            cellsLiveData.postValue(board.cells)
-            helpAvailableLiveData.postValue(false)
+            showAdLiveData.postValue(true)
         }
     }
 
     private fun solveInStyle() {
         val boardValues = Array(81) { i -> board.cells[i].value }
 
-        val scope = CoroutineScope(Dispatchers.Default)
-        scope.launch {
+        solveJob = GlobalScope.launch(Dispatchers.Default) {
             SudokuBoardGenerator.solve(boardValues) { idx ->
                 board.cells[idx].apply {
                     value = boardValues[idx]
@@ -267,6 +275,7 @@ class SudokuGame {
                 }
                 cellsLiveData.postValue(board.cells)
                 Thread.sleep(10L)
+                ensureActive()
             }
             filledIn = 81
             checkIfBoardComplete()

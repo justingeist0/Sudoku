@@ -11,6 +11,10 @@ import com.fantasma.sudoku.R
 import com.fantasma.sudoku.game.Cell
 import com.fantasma.sudoku.util.Constant.GRID_SIZE
 import com.fantasma.sudoku.util.Constant.SQRT_SIZE
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlin.math.min
 
 class SudokuBoardView(context: Context, attributeSet: AttributeSet) : View(context, attributeSet) {
@@ -31,6 +35,8 @@ class SudokuBoardView(context: Context, attributeSet: AttributeSet) : View(conte
     private var listener: OnTouchListener? = null
 
     private var cells: List<Cell>? = null
+    private var animate = false
+    var createdBoardView = false
 
     private val thickLinePaint = Paint().apply {
         style = Paint.Style.STROKE
@@ -98,9 +104,114 @@ class SudokuBoardView(context: Context, attributeSet: AttributeSet) : View(conte
     }
 
     override fun onDraw(canvas: Canvas) {
-        fillCells(canvas)
+        if(animate)
+            animationStep(canvas)
+        else
+            fillCells(canvas)
         drawLines(canvas)
         drawText(canvas)
+    }
+
+    fun winAnimation() {
+        if(animate) return
+
+        animate = true
+        GlobalScope.launch(Dispatchers.Default) {
+            spiralTraverse = true
+            var startRow = 0
+            var endRow = GRID_SIZE - 1
+            var startCol = 0
+            var endCol = GRID_SIZE - 1
+
+            while(startRow <= endRow && startCol <= endCol) {
+                for(col in startCol..endCol) {
+                    drawSpiralAnimationPosition(startRow, col)
+                }
+                for (row in startRow+1..endRow) {
+                    drawSpiralAnimationPosition(row, endCol)
+                }
+                for (col in endCol-1 downTo startCol) {
+                    if (startRow == endRow) break
+                    drawSpiralAnimationPosition(endRow, col)
+                }
+                for (row in endRow-1 downTo startRow + 1) {
+                    if(startCol == endCol) break
+                    drawSpiralAnimationPosition(row, startCol)
+                }
+                startRow++
+                endRow--
+                startCol++
+                endCol--
+            }
+
+            drawSpiralAnimationPosition(animationRow, animationCol) //Center Solid
+
+            spiralTraverse = false
+            var delay = 50L
+            for(i in 0 until 5) {
+                animationCol = GRID_SIZE/2
+                animationCol2 = animationCol
+                animationRow = animationCol
+                animationRow2 = animationCol
+
+                while (animationCol >= 0) {
+                    animationCol--
+                    animationRow--
+                    animationCol2++
+                    animationRow2++
+                    invalidate()
+                    delay(delay)
+                }
+                delay += 20L
+            }
+
+            selectedCol = -1
+            selectedRow = -1
+            animate = false
+            invalidate()
+        }
+    }
+
+    private suspend fun drawSpiralAnimationPosition(row: Int, col: Int) {
+        animationCol2 = animationCol
+        animationRow2 = animationRow
+        animationRow = row
+        animationCol = col
+        invalidate()
+        delay(20)
+    }
+
+    var animationRow2 = 0
+    var animationCol2 = 0
+    var animationRow = 0
+    var animationCol = 0
+    var spiralTraverse = true
+
+    private fun animationStep(canvas: Canvas) {
+        if(spiralTraverse) { //Spiral traverse animation
+            fillCell(canvas, animationRow2, animationCol2, conflictingValidCellPaint)
+            fillCell(canvas, animationRow, animationCol, startingValidCellPaint)
+        } else { //middle out traverse animation
+            for (col in animationCol+1 until animationCol2) {
+                fillCell(canvas, animationRow+1, col, conflictingValidCellPaint)
+                fillCell(canvas, animationRow2-1, col, conflictingValidCellPaint)
+            }
+            for (row in animationRow+2 until animationRow2-1) {
+                fillCell(canvas, row, animationCol+1, conflictingValidCellPaint)
+                fillCell(canvas, row, animationCol2-1, conflictingValidCellPaint)
+            }
+
+            if(animationCol >= 0) {
+                for (col in animationCol..animationCol2) {
+                    fillCell(canvas, animationRow, col, startingValidCellPaint)
+                    fillCell(canvas, animationRow2, col, startingValidCellPaint)
+                }
+                for (row in animationRow + 1 until animationRow2) {
+                    fillCell(canvas, row, animationCol, startingValidCellPaint)
+                    fillCell(canvas, row, animationCol2, startingValidCellPaint)
+                }
+            }
+        }
     }
 
     private fun updateMeasurements(width: Float, height: Float) {
@@ -138,6 +249,12 @@ class SudokuBoardView(context: Context, attributeSet: AttributeSet) : View(conte
 
     private fun fillCells(canvas: Canvas) {
         if (selectedRow == -1 || selectedCol == -1) {
+            if(createdBoardView) {
+                cells?.forEach { cell ->
+                    if(cell.isStartingCell)
+                        fillCell(canvas, cell.row, cell.col, conflictingValidCellPaint)
+                }
+            }
             return
         }
 
