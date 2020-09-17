@@ -247,7 +247,7 @@ class SudokuGame {
     }
 
     fun setAnswerForSelected() {
-        if(true) {
+        if(true) { //Change true to adShown before release.
             if (board.difficulty() == SOLVER) {
                 solveInStyle()
             } else {
