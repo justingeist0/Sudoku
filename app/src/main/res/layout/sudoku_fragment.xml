@@ -8,7 +8,7 @@
 
         <variable
             name="sudokuGame"
-            type="com.fantasma.sudoku.game.SudokuGame" />
+            type="com.fantasmaplasma.sudoku.game.SudokuGame" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -17,7 +17,7 @@
         android:layout_height="match_parent"
         tools:context=".ui.fragment.SudokuFragment">
 
-        <com.fantasma.sudoku.view.custom.SudokuBoardView
+        <com.fantasmaplasma.sudoku.view.SudokuBoardView
             android:id="@+id/game_layout"
             android:layout_width="0dp"
             android:layout_height="0dp"
@@ -48,7 +48,7 @@
                 android:layout_weight="1"
                 android:background="@drawable/btn_circle"
                 android:onClick="@{() -> sudokuGame.undo()}"
-                android:src="@drawable/ic_undo"
+                android:src="@drawable/ic_undo_selector"
                 android:text="@string/_1" />
 
             <ImageButton
@@ -59,7 +59,7 @@
                 android:layout_weight="1"
                 android:background="@drawable/btn_circle"
                 android:onClick="@{() -> sudokuGame.redo()}"
-                android:src="@drawable/ic_redo"
+                android:src="@drawable/ic_redo_selector"
                 android:text="@string/_1" />
 
             <ImageButton
@@ -70,7 +70,7 @@
                 android:layout_weight="1"
                 android:background="@drawable/btn_circle"
                 android:onClick="@{() -> sudokuGame.delete()}"
-                android:src="@drawable/ic_delete"
+                android:src="@drawable/ic_delete_selector"
                 android:text="@string/_1" />
 
         </LinearLayout>
@@ -203,27 +203,80 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/numbers_layout">
 
-            <ImageButton
+            <RelativeLayout
                 android:id="@+id/help_btn"
                 style="@style/numberButton"
+                android:background="@drawable/btn_circle"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_weight="2"
-                android:background="@drawable/btn_circle"
+                android:orientation="vertical"
+                android:gravity="center"
                 android:onClick="@{() -> sudokuGame.setAnswerForSelected()}"
-                android:src="@drawable/ic_hint"
-                android:text="@string/_1" />
+                android:contentDescription="@string/hint"
+                android:layout_weight="2">
 
-            <ImageButton
+                <ImageView
+                    android:id="@+id/help_btn_image"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:minHeight="16dp"
+                    android:src="@drawable/ic_hint_selector"
+                    android:background="@android:color/transparent"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentEnd="true"
+                    android:layout_above="@id/help_btn_tv"
+                    tools:ignore="ContentDescription" />
+
+                <TextView
+                    android:id="@+id/help_btn_tv"
+                    android:layout_width="match_parent"
+                    android:layout_height="16sp"
+                    android:singleLine="true"
+                    android:gravity="center"
+                    android:layout_alignParentBottom="true"
+                    android:textSize="12sp"
+                    app:autoSizeMaxTextSize="12sp"
+                    app:autoSizeMinTextSize="4sp"
+                    app:autoSizeStepGranularity="2sp"
+                    app:autoSizeTextType="uniform"
+                    android:text="@string/hint"/>
+
+            </RelativeLayout>
+
+            <LinearLayout
                 android:id="@+id/notes_btn"
                 style="@style/numberButton"
+                android:background="@drawable/btn_circle"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center"
                 android:onClick="@{() -> sudokuGame.changeNoteTakingState()}"
-                android:src="@drawable/ic_notes"
-                android:text="@string/_1" />
+                android:contentDescription="@string/note"
+                android:layout_weight="1">
 
+                <ImageView
+                    android:id="@+id/notes_btn_image"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_notes"
+                    tools:ignore="ContentDescription" />
+
+                <TextView
+                    android:id="@+id/notes_btn_tv"
+                    android:layout_width="match_parent"
+                    android:layout_height="16sp"
+                    android:singleLine="true"
+                    android:gravity="center"
+                    android:textSize="12sp"
+                    app:autoSizeMaxTextSize="12sp"
+                    app:autoSizeMinTextSize="6sp"
+                    app:autoSizeStepGranularity="2sp"
+                    app:autoSizeTextType="uniform"
+                    android:text="@string/note"/>
+
+            </LinearLayout>
 
         </LinearLayout>
 

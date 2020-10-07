@@ -6,11 +6,11 @@
     <data>
         <variable
             name="menu"
-            type="com.fantasma.sudoku.ui.fragment.MainMenuFragment" />
+            type="com.fantasmaplasma.sudoku.ui.fragment.MainMenuFragment" />
 
         <variable
             name="constant"
-            type="com.fantasma.sudoku.util.Constant" />
+            type="com.fantasmaplasma.sudoku.util.Constant" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -18,7 +18,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".ui.fragment.MainMenuFragment">
-
 
         <ImageView
             android:id="@+id/logo_image"
@@ -81,7 +80,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:onClick="@{() -> menu.themesOrExpertPressed()}"
-                tools:text="@string/darkTheme" />
+                tools:text="@string/dark_theme" />
 
         </LinearLayout>
 

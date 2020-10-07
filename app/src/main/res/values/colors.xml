@@ -13,4 +13,6 @@
     <color name="invalidCellText">#8A0000</color>
     <color name="text">#000000</color>
     <color name="dialogBackground">#FFFFFF</color>
+    <color name="yellow">#FFF3B9</color>
+    <color name="white">#ffffff</color>
 </resources>

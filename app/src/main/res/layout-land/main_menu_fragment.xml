@@ -6,11 +6,11 @@
     <data>
         <variable
             name="menu"
-            type="com.fantasma.sudoku.ui.fragment.MainMenuFragment" />
+            type="com.fantasmaplasma.sudoku.ui.fragment.MainMenuFragment" />
 
         <variable
             name="constant"
-            type="com.fantasma.sudoku.util.Constant" />
+            type="com.fantasmaplasma.sudoku.util.Constant" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -23,7 +23,6 @@
             android:id="@+id/layout_buttons"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
             android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -68,7 +67,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:onClick="@{() -> menu.themesOrExpertPressed()}"
-                tools:text="@string/darkTheme" />
+                tools:text="@string/dark_theme" />
 
         </LinearLayout>
 

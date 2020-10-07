@@ -17,15 +17,15 @@
     <string name="created_boards">Created Boards</string>
 
     <string name="loading">Loading Board…</string>
-    <string name="back">Main Menu</string>
+    <string name="main_menu">Main Menu</string>
     <string name="easy">Easy</string>
     <string name="intermediate">Intermediate</string>
     <string name="hard">Hard</string>
     <string name="expert">Expert</string>
 
-    <string name="darkTheme">Dark Theme 🔳️</string>
-    <string name="lightTheme">Light Theme 🔲</string>
-    <string name="this_cannot_be_undone">This cannot be undone</string>
+    <string name="dark_theme">Dark Theme 🔳️</string>
+    <string name="light_theme">Light Theme 🔲</string>
+    <string name="this_cannot_be_undone">This cannot be undone.</string>
     <string name="cancel">Cancel</string>
     <string name="confirm">Confirm</string>
     <string name="delete_board">Delete Board?</string>
@@ -34,7 +34,10 @@
     <string name="view">View</string>
     <string name="delete">Delete</string>
     <string name="restart">Restart</string>
-    <string name="solverAdToast">Click light bulb when ready to solve.</string>
-    <string name="newGameAdToast">Hint available by clicking light bulb.</string>
-    <string name="mainMenuHeader">Newspaper Sudoku🗞 📰</string>
+    <string name="main_menu_header">Newspaper Sudoku🗞 📰</string>
+    <string name="note">Note</string>
+    <string name="hint">Hint</string>
+    <string name="solve">Solve</string>
+    <string name="back">Back</string>
+    <string name="no_board_to_continue">No board to continue.</string>
 </resources>

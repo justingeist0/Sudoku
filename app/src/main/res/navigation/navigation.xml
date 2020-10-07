@@ -7,8 +7,8 @@
 
     <fragment
         android:id="@+id/mainMenu"
-        android:name="com.fantasma.sudoku.ui.fragment.MainMenuFragment"
-        android:label="@string/mainMenuHeader"
+        android:name="com.fantasmaplasma.sudoku.ui.fragment.MainMenuFragment"
+        android:label="@string/main_menu_header"
         tools:layout="@layout/main_menu_fragment" >
         <action
             android:id="@+id/action_mainMenu_to_portfolioFragment"
@@ -27,7 +27,7 @@
     </fragment>
     <fragment
         android:id="@+id/sudokuFragment"
-        android:name="com.fantasma.sudoku.ui.fragment.SudokuFragment"
+        android:name="com.fantasmaplasma.sudoku.ui.fragment.SudokuFragment"
         android:label="@string/loading" >
         <argument
             android:name="mode"
@@ -35,7 +35,7 @@
     </fragment>
     <fragment
         android:id="@+id/portfolioFragment"
-        android:name="com.fantasma.sudoku.ui.fragment.PortfolioFragment"
+        android:name="com.fantasmaplasma.sudoku.ui.fragment.PortfolioFragment"
         android:label="@string/created_boards"
         tools:layout="@layout/portfolio_fragment" >
         <action
