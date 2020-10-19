@@ -76,7 +76,7 @@ class SudokuFragment : Fragment(), SudokuBoardView.OnTouchListener {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        viewModel.initAd(requireActivity())
+        //viewModel.initAd(requireActivity())
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -109,7 +109,7 @@ class SudokuFragment : Fragment(), SudokuBoardView.OnTouchListener {
 
         timerLabelLiveData.observe(viewLifecycleOwner, Observer { updateTimer(it) })
 
-        showAdLiveData.observe(viewLifecycleOwner, Observer {showAd(it)})
+        //showAdLiveData.observe(viewLifecycleOwner, Observer {showAd(it)})
         }
         updateHeaderMode(LOADING)
         super.onViewCreated(view, savedInstanceState)
