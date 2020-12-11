@@ -46,7 +46,8 @@ class MainMenuFragment : Fragment() {
             .getInstance(requireContext())
             .sleepDataBaseDao
         viewModel.setDatabase(database)
-        activity?.onBackPressedDispatcher?.addCallback(this, object : OnBackPressedCallback(true) {
+        activity?.onBackPressedDispatcher?.addCallback(this,
+            object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 if(showingMainMenu()) {
                     isEnabled = false
@@ -68,7 +69,7 @@ class MainMenuFragment : Fragment() {
         )
         binding.menu = this
         binding.constant = Constant
-        buttons = arrayOf(
+        buttons = arrayOf (
             binding.newGameBtn,
             binding.continueGameBtn,
             binding.solverBtn,

@@ -28,7 +28,8 @@ interface SudokuBoardDatabaseDao {
     fun getLastCreatedBoard(): SudokuBoard?
 
     @Query("SELECT * from sudoku_board_table WHERE board_used = 1 ORDER BY created_board DESC")
-    fun getAllBoards(): LiveData<List<SudokuBoard>> //Live data so if user selected existing board they can go back to portfolio and their board in the view is updated automatically
+    fun getAllBoards(): LiveData<List<SudokuBoard>>
+    //Live data so boards are updated automatically
 
     @Query("DELETE from sudoku_board_table")
     fun nukeTable()
